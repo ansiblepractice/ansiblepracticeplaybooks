@@ -5,30 +5,14 @@
     register: api_einv_calls
   - debug: msg="{{api_einv_calls.stdout_lines}}"
   - debug: msg="{{api_einv_calls.stdout.split('\n')[1] }}"
-#  - name: Sending an e-mail using SMTP servers
-#    mail:
-#      host: email-smtp.ap-south-1.amazonaws.com
-#      port: 587
-#      username: support@incresol.com
-#      username: AKIAWR7VQRSD6KGEUKNB
-#      password: BLKs3+dc0OYscCnNtqcjqdYaHiJK+3yie2dsxW9A/0Qv
-#      from: support@incresol.com
-#      to: devops@teams.incresol.com
-#      subject: Monitoring Alert:No Issue with API E-Invoice Calls 
-#      subtype: html
-#      body: '{{ lookup("template", "templates/mail_api_einv_calls.html.j2") }}'
-#    when: api_einv_calls.stdout.split('\n')[1] | int > 20
-#   delegate_to: localhost
-#    run_once: True
   - name: Sending an e-mail using SMTP servers when API E-Invoice calls are critical
     mail:
-      host: email-smtp.ap-south-1.amazonaws.com
+      host: HOSTNAME
       port: 587
-#      username: support@incresol.com
-      username: AKIAWR7VQRSD6KGEUKNB
-      password: BLKs3+dc0OYscCnNtqcjqdYaHiJK+3yie2dsxW9A/0Qv
-      from: support@incresol.com
-      to: devops@teams.incresol.com
+      username: USERNAME
+      password: PASSWORD
+      from: FROM EMAIL 
+      to: TO EMAIL
       subject: Monitoring Alert:API E-Invoice Calls are Critical
       subtype: html
       body: '{{ lookup("template", "templates/mail_api_einv_calls1.html.j2") }}'
