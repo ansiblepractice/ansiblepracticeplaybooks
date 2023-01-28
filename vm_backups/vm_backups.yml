@@ -1,0 +1,72 @@
+---
+- hosts: localhost
+  tasks:
+  - stat:
+     path: /bkp3/srv1/server1_vm_backups/
+    register: p
+  - name: Sending an e-mail using SMTP servers when nfs issue
+    mail:
+      host: HOST
+      port: 587
+      username: USERNAME
+      password: PASSWORD
+      from: FROM EMAIL 
+      to: TO EMAIL
+      subject: Internal servers mount point bacup issue
+      subtype: html
+      body: '{{ lookup("template", "nfs.html.j2") }}'
+    when: not p.stat.exists
+  - name: Step 1 - Turning off the Devportal VM
+    shell: virsh shutdown OS-AT-DEV-PORTAL
+    become: yes
+    delegate_to: localhost
+  - pause:
+     seconds: 45
+  - name: Step 2 - Backup Devportal VM
+    shell: cp /kvm/vms1/OS-AT-DEV-PORTAL/OS-AT-DEV-PORTAL-ROOT.qcow2 /bkp3/srv1/server1_vm_backups/OS-AT-DEV-PORTAL-BKP/
+    become: yes
+  - name: Step 3 - Turning on the VM
+    shell: virsh start OS-AT-DEV-PORTAL
+    become: yes
+    delegate_to: localhost
+  - name: Step 4 - Create a sample log file to track about the Backups
+    shell: cd /bkp3/srv1/server1_vm_backups/OS-AT-DEV-PORTAL-BKP/ && touch logfile
+    become: yes
+  - shell: echo "Backup activity of Devportal VM done on $(date '+%Y-%m-%d %H:%M:%S')" >> /bkp3/srv1/server1_vm_backups/OS-AT-DEV-PORTAL-BKP/logfile
+    become: yes
+  - name: Step 1 - Turning off the Deployment VM
+    shell: virsh shutdown OS-AT-PRD-DEPTOOL
+    become: yes
+    delegate_to: localhost
+  - pause:
+     seconds: 45
+  - name: Step 2 - Backup of Deployment VM
+    shell: cp /kvm/vms1/OS-AT-PRD-DEPTOOL/OS-AT-PRD-DEPTOOL-ROOT.qcow2 /bkp3/srv1/server1_vm_backups/OS-AT-PRD-DEPTOOL-BKP/
+    become: yes
+  - name: Step 3 - Turning on the VM
+    shell: virsh start OS-AT-PRD-DEPTOOL
+    become: yes
+    delegate_to: localhost
+  - name: Step 4 - Create a sample log file to track about the Backups
+    shell: cd /bkp3/srv1/server1_vm_backups/OS-AT-PRD-DEPTOOL-BKP/ && touch logfile
+    become: yes
+  - shell: echo "Backup activity of Deployment VM done on $(date '+%Y-%m-%d %H:%M:%S')" >> /bkp3/srv1/server1_vm_backups/OS-AT-PRD-DEPTOOL-BKP/logfile
+    become: yes
+  - name: Step 1 - Turning off the ELK VM
+    shell: virsh shutdown OS-AT-PRD-ELK
+    become: yes
+    delegate_to: localhost
+  - pause:
+     seconds: 45
+  - name: Step 2 - Backup ELK VM
+    shell: cp /kvm/vms1/OS-AT-PRD-ELK/OS-AT-PRD-ELK-ROOT.qcow2 /bkp3/srv1/server1_vm_backups/OS-AT-PRD-ELK-ROOT-BKP/
+    become: yes
+  - name: Step 3 - Turning on the ELK VM
+    shell: virsh start OS-AT-PRD-ELK
+    become: yes
+    delegate_to: localhost
+  - name: Step 4 - Create a sample log file to track about the Backups
+    shell: cd /bkp3/srv1/server1_vm_backups/OS-AT-PRD-ELK-ROOT-BKP/ && touch logfile
+    become: yes
+  - shell: echo "Backup activity of ELK VM done on $(date '+%Y-%m-%d %H:%M:%S')" >> /bkp3/srv1/server1_vm_backups/OS-AT-PRD-ELK-ROOT-BKP/logfile
+    become: yes
